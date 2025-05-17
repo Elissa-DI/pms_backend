@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  role       Role
+  isVerified Boolean  @default(false)
+  otp        String?
+  createdAt  DateTime @default(now())
+
+  bookings   Booking[]
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  CUSTOMER
+}
+
+model Slot {
+  id          String       @id @default(uuid())
+  number      String       @unique
+  size        SlotSize     @map("size")
+  vehicleType VehicleType
+  location    String
+  status      SlotStatus   @default(AVAILABLE)
+  bookings    Booking[]
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+}
+
+enum SlotStatus {
+  AVAILABLE
+  OCCUPIED
+  UNAVAILABLE
+}
+
+enum SlotSize {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+enum VehicleType {
+  MOTORCYCLE
+  CAR
+  TRUCK
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  userId    String
+  slotId    String
+  startTime DateTime
+  endTime   DateTime
+  status    BookingStatus @default(PENDING)
+
+  user      User     @relation(fields: [userId], references: [id])
+  slot      Slot     @relation(fields: [slotId], references: [id])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
