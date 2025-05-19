@@ -12,6 +12,11 @@ const validationMiddleware = (
 ): RequestHandler => {
     return async (req, res, next) => {
         try {
+            // ✅ Guard against undefined or invalid DTOs
+            if (!type || typeof type !== 'function') {
+                return next(new HttpException(500, 'Invalid DTO passed to validation middleware'));
+            }
+
             // Transform request data to an instance of the provided type
             const transformed = plainToInstance(type, req[value]);
 
@@ -23,14 +28,12 @@ const validationMiddleware = (
             });
 
             if (errors.length > 0) {
-                // Extract and format error messages
                 const message = errors
                     .map((error: ValidationError) =>
                         error.constraints ? Object.values(error.constraints).join(', ') : 'Invalid input'
                     )
                     .join(', ');
 
-                // Pass error to the next middleware
                 return next(new HttpException(400, message));
             }
 
@@ -41,4 +44,4 @@ const validationMiddleware = (
     };
 };
 
-export default validationMiddleware;
+export default validationMiddleware

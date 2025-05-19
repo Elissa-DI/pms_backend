@@ -4,8 +4,15 @@ import { BookingStatus } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export class CustomerBookingService {
-    async getAvailableSlots() {
-        return prisma.slot.findMany({ where: { status: 'AVAILABLE' } });
+    async getAvailableSlots(filters: { size?: string; vehicleType?: string }) {
+        // return prisma.slot.findMany({ where: { status: 'AVAILABLE' } });
+        return prisma.slot.findMany({
+            where: {
+                status: 'AVAILABLE',
+                ...(filters.size && { size: filters.size as any }),
+                ...(filters.vehicleType && { vehicleType: filters.vehicleType as any }),
+            },
+        });
     }
 
     async bookSlot(data: {
