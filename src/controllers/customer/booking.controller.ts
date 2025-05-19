@@ -6,9 +6,14 @@ const service = new CustomerBookingService();
 
 export class CustomerBookingController {
     async getAvailableSlots(req: Request, res: Response, next: NextFunction) {
-        const slots = await service.getAvailableSlots();
+        const { size, vehicleType } = req.query;
+        const slots = await service.getAvailableSlots({
+            size: size as string,
+            vehicleType: vehicleType as string,
+        });
         res.status(200).json(slots);
     }
+
 
     async bookSlot(req: RequestWithUser, res: Response, next: NextFunction) {
         const userId = req.user.id;

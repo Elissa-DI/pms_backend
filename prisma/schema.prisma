@@ -21,6 +21,8 @@ model User {
   role       Role
   isVerified Boolean  @default(false)
   otp        String?
+  resetToken       String?
+  resetTokenExpiry DateTime?
   createdAt  DateTime @default(now())
 
   bookings   Booking[]
