@@ -6,6 +6,8 @@ import { LoginDto } from '@/dtos/auth/login.dto';
 import { VerifyEmailDto } from '@/dtos/auth/verify-email.dto';
 import { ResendOtpDto } from '@/dtos/auth/resend-otp.dto';
 import { IRouter } from '@/common/interfaces/route.interface';
+import { ForgotPasswordDto } from '@/dtos/auth/forgot-password.dto';
+import { ResetPasswordDto } from '@/dtos/auth/reset-password.dto';
 
 class AuthRouter implements IRouter {
   public path = '/api/auth';
@@ -42,6 +44,17 @@ class AuthRouter implements IRouter {
       '/resend-otp',
       validationMiddleware(ResendOtpDto),
       this.asyncHandler(this.controller.resendOtp.bind(this.controller))
+    );
+    this.router.post(
+      '/forgot-password',
+      validationMiddleware(ForgotPasswordDto),
+      this.asyncHandler(this.controller.forgotPassword.bind(this.controller))
+    );
+
+    this.router.post(
+      '/reset-password',
+      validationMiddleware(ResetPasswordDto),
+      this.asyncHandler(this.controller.resetPassword.bind(this.controller))
     );
   }
 }

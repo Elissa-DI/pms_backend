@@ -121,4 +121,54 @@ export class AuthService {
 
     return { message: 'OTP resent successfully. Please check your email.' };
   }
+
+  async forgotPassword(email: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error('User not found');
+
+    const resetToken = speakeasy.generateSecret({ length: 32 }).base32;
+    const resetTokenExpiry = new Date(Date.now() + 1000 * 60 * 15);
+
+    await prisma.user.update({
+      where: { email },
+      data: {
+        resetToken,
+        resetTokenExpiry,
+      },
+    });
+
+    await sendEmail(
+      email,
+      'Password Reset Request',
+      `Use this token to reset your password: ${resetToken}`
+    );
+
+    return { message: 'Reset token sent to email' };
+  }
+
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: { gte: new Date() },
+      },
+    });
+
+    if (!user) throw new Error('Invalid or expired reset token');
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashed,
+        resetToken: null,
+        resetTokenExpiry: null,
+      },
+    });
+
+    return { message: 'Password reset successful' };
+  }
+
 }
