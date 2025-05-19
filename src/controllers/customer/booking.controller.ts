@@ -47,4 +47,12 @@ export class CustomerBookingController {
         await service.cancelBooking(id, userId);
         res.status(200).json({ message: 'Booking cancelled' });
     }
+
+    async getPaymentTicket(req: RequestWithUser, res: Response, next: NextFunction) {
+        const userId = req.user.id;
+        const { id: bookingId } = req.params;
+
+        const ticket = await service.generatePaymentTicket(bookingId, userId);
+        res.status(200).json(ticket);
+    }
 }

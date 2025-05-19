@@ -49,6 +49,12 @@ class CustomerBookingRouter implements IRouter {
       isAuthenticated,
       this.asyncHandler<RequestWithUser>(this.controller.cancelBooking.bind(this.controller))
     );
+
+    this.router.get(
+      '/:id/ticket',
+      isAuthenticated,
+      this.asyncHandler<RequestWithUser>(this.controller.getPaymentTicket.bind(this.controller))
+    );
   }
 }
 

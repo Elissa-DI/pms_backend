@@ -74,6 +74,8 @@ model Booking {
 
   user      User     @relation(fields: [userId], references: [id])
   slot      Slot     @relation(fields: [slotId], references: [id])
+
+  Ticket Ticket[]
 }
 
 enum BookingStatus {
@@ -82,3 +84,12 @@ enum BookingStatus {
   CANCELLED
   COMPLETED
 }
+
+model Ticket {
+  id          String   @id @default(uuid())
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+  bookingId   String   @unique
+  amount      Float
+  issuedAt    DateTime @default(now())
+}
+

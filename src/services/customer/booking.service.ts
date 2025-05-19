@@ -64,4 +64,76 @@ export class CustomerBookingService {
 
         return booking;
     }
+
+
+    // async generatePaymentTicket(bookingId: string, userId: string) {
+    //     const booking = await prisma.booking.findFirst({
+    //         where: { id: bookingId, userId },
+    //         include: { slot: true },
+    //     });
+
+    //     if (!booking) throw new Error('Booking not found');
+
+    //     const { startTime, endTime } = booking;
+
+    //     if (!startTime || !endTime) {
+    //         throw new Error('Booking does not have valid time range');
+    //     }
+
+    //     const durationMs = new Date(endTime).getTime() - new Date(startTime).getTime();
+    //     const durationHours = Math.ceil(durationMs / (1000 * 60 * 60));
+
+    //     const ratePerHour = 1000; // Customize as needed
+    //     const total = durationHours * ratePerHour;
+
+    //     return {
+    //         bookingId: booking.id,
+    //         slotNumber: booking.slot.number,
+    //         vehicleType: booking.slot.vehicleType,
+    //         location: booking.slot.location,
+    //         startTime,
+    //         endTime,
+    //         durationHours,
+    //         ratePerHour,
+    //         total,
+    //     };
+    // }
+
+    async generatePaymentTicket(bookingId: string, userId: string) {
+        const booking = await prisma.booking.findFirst({
+            where: { id: bookingId, userId },
+            include: { slot: true },
+        });
+
+        if (!booking) throw new Error('Booking not found');
+
+        const { startTime, endTime, slot } = booking;
+
+        // Calculate exact duration in hours (as a float)
+        const durationMs = endTime.getTime() - startTime.getTime();
+        const durationHours = durationMs / (1000 * 60 * 60); // convert ms to hours
+
+        // Define rate based on vehicle type
+        const rates: Record<string, number> = {
+            CAR: 1000,
+            MOTORCYCLE: 500,
+            TRUCK: 1500,
+        };
+
+        const rate = rates[slot.vehicleType] || 1000;
+        const total = parseFloat((durationHours * rate).toFixed(2));
+
+        return {
+            bookingId: booking.id,
+            slotNumber: slot.number,
+            vehicleType: slot.vehicleType,
+            location: slot.location,
+            startTime,
+            endTime,
+            durationHours: parseFloat(durationHours.toFixed(2)),
+            ratePerHour: rate,
+            total,
+        };
+    }
+
 }
