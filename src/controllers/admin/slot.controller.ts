@@ -60,7 +60,11 @@ export class SlotController {
 
     async deleteSlot(req: Request, res: Response, next: NextFunction) {
         try {
-            res.json({ message: 'Slot deleted successfully' });
+            const deletedSlot = await this.service.deleteSlot(req.params.id);
+            res.json({
+                message: 'Slot deleted successfully',
+                slot: deletedSlot,
+            });
         } catch (error) {
             next(error);
         }
